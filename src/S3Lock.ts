@@ -1,7 +1,7 @@
 import ILockStageContainer from './ILockStageContainer';
 import LockOwner from './LockOwner';
 import LockRequestResult from './LockRequestResult';
-import LockResult from './LockResultEnum';
+import LockResultEnum from './LockResultEnum';
 import LockStageContainer from './LockStageContainer';
 
 const ACQUIRE_LOCK_MAX_DURATION_IN_MINUTES: number = 1;
@@ -88,7 +88,7 @@ export default class S3Lock {
       else if (currentLockOwner.getRemainingTimeInSeconds() <= (this.maximumAllowedTimeForOperationInMinutes * 60)) {
         throw new Error(`Acquiring the lock took too long, you potentially do not have enough time to perform your opertion (limit set to ${this.maximumAllowedTimeForOperationInMinutes} minutes). Please retry.`);
       }
-      lockRequestResult = new LockRequestResult(newOwnerName, LockResult.Acquired)
+      lockRequestResult = new LockRequestResult(newOwnerName, LockResultEnum.Acquired)
     }
     catch (err) {
       if (releaseLockOnException) {
@@ -99,7 +99,7 @@ export default class S3Lock {
         }
       }
       const errorMessage = `Lock error: ${err.message}`;
-      lockRequestResult = new LockRequestResult(newOwnerName, LockResult.NotAcquired, errorMessage)
+      lockRequestResult = new LockRequestResult(newOwnerName, LockResultEnum.NotAcquired, errorMessage)
     }
     return lockRequestResult;
   }

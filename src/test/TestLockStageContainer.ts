@@ -7,75 +7,87 @@ import TestStage from './TestStage';
 export default class TestLockStageContainer implements ILockStageContainer {
   private readonly _testLockReadWriter: TestLockReadWriter = new TestLockReadWriter();
 
+  /**
+   * 
+   * @param initialState - The starting state for the lock
+   * @param _stageSequence - If overriding the result of the read/write operations then provide the results of the operations here.
+   * @param _clock - the fake clock to use for scheduling operations, (required if using cusotm TestStages)
+   */
   constructor(
       initialState: InitialState,
-      private _stageSequence: TestStage<unknown>[],
-      private _clock: sinon.SinonFakeTimers) {
+      private _stageSequence: TestStage<unknown>[] = [],
+      private _clock?: sinon.SinonFakeTimers) {
     this._testLockReadWriter.init(initialState);
   }
 
   public async getInitialLockCounter(targetOwnerName: string): Promise<number|undefined> {
     const stageOverride: TestStage<number> = await this.waitUntilOwnerStageIsNext<number>(targetOwnerName, 'getInitialLockCounter');
-    // NOTE: The initial lock counter call must be overwritten to provide an initial counter value. This is an internal implementation
-    // detail which is why it's not provided in the InitialState object.
-    if (stageOverride.actionOverride) {
-      const counter = await stageOverride.actionOverride;
-      this._testLockReadWriter.setLockCounter(counter);
+    if (stageOverride) {
+      // NOTE: The initial lock counter call must be overwritten to provide an initial counter value. This is an internal implementation
+      // detail which is why it's not provided in the InitialState object.
+      if (stageOverride.actionOverride) {
+        const counter = await stageOverride.actionOverride;
+        this._testLockReadWriter.setLockCounter(counter);
+      }
+      else {
+        throw new Error(`getInitialLockCounter() must be overridden in order to set the initial counter value.`);
+      }
     }
     else {
-      throw new Error(`getInitialLockCounter() must be overridden in orde rto set the initial counter value.`);
+      // No initial override provided so default to zero.
+      this._testLockReadWriter.setLockCounter(0);
     }
     return this._testLockReadWriter.getLockCounter();
   }
 
   public async getLockOwnerForInitialCheck(targetOwnerName: string): Promise<LockOwner> {
     const stageOverride: TestStage<LockOwner> = await this.waitUntilOwnerStageIsNext<LockOwner>(targetOwnerName, 'getLockOwnerForInitialCheck');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
   }
 
   public async setLockOwnerForMainAcquire(targetLockOwner: LockOwner): Promise<void> {
     const stageOverride: TestStage<void> = await this.waitUntilOwnerStageIsNext<void>(targetLockOwner.lockOwnerName, 'setLockOwnerForMainAcquire');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.setLockOwner(targetLockOwner);
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.setLockOwner(targetLockOwner);
   }
   
   public async setLockOwnerForLockRollback(targetOwnerName: string): Promise<void> {
     const stageOverride: TestStage<void> = await this.waitUntilOwnerStageIsNext<void>(targetOwnerName, 'setLockOwnerForLockRollback');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.setLockOwner(LockOwner.NO_LOCK);
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.setLockOwner(LockOwner.NO_LOCK);
   }
 
   public async getLockOwnerForFinalCheck(targetOwnerName: string): Promise<LockOwner> {
     const stageOverride: TestStage<LockOwner> = await this.waitUntilOwnerStageIsNext<LockOwner>(targetOwnerName, 'getLockOwnerForFinalCheck');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
   }
 
   public async getLockOwnerForLockRollback(targetOwnerName: string): Promise<LockOwner> {
     const stageOverride: TestStage<LockOwner> = await this.waitUntilOwnerStageIsNext<LockOwner>(targetOwnerName, 'getLockOwnerForLockRollback');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
   }
 
   public async getLockCounter(targetOwnerName: string): Promise<number|undefined> {
     const stageOverride: TestStage<number> = await this.waitUntilOwnerStageIsNext<number>(targetOwnerName, 'getLockCounter');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockCounter();
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockCounter();
   }
 
   public async setLockCounter(targetOwnerName: string, newCounter: number): Promise<void> {
     const stageOverride: TestStage<void> = await this.waitUntilOwnerStageIsNext<void>(targetOwnerName, 'setLockCounter');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.setLockCounter(newCounter);
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.setLockCounter(newCounter);
   }
 
   public async getLockOwnerForRelease(expectedCurrentOwnerName: string): Promise<LockOwner> {
     const stageOverride: TestStage<LockOwner> = await this.waitUntilOwnerStageIsNext<LockOwner>(expectedCurrentOwnerName, 'getLockOwnerForRelease');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
   }
 
   public async releaseLock(expectedCurrentOwnerName: string): Promise<void> {
     const stageOverride: TestStage<void> = await this.waitUntilOwnerStageIsNext<void>(expectedCurrentOwnerName, 'releaseLock');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.setLockOwner(LockOwner.NO_LOCK);
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.setLockOwner(LockOwner.NO_LOCK);
   }
 
   public async getLockOwnerForStatusCheck(expectedCurrentOwnerName: string): Promise<LockOwner> {
     const stageOverride: TestStage<LockOwner> = await this.waitUntilOwnerStageIsNext<LockOwner>(expectedCurrentOwnerName, 'getLockOwnerForStatusCheck');
-    return stageOverride.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
+    return stageOverride?.actionOverride ? stageOverride.actionOverride : this._testLockReadWriter.getLockOwner();
   }
 
   public getTestLockOwner(): LockOwner {
@@ -93,15 +105,15 @@ export default class TestLockStageContainer implements ILockStageContainer {
     do {
       nextOperation = this._stageSequence[0] as TestStage<T>;
       // Continue until we have the required owner's stage.
-      continueLoop = !(nextOperation.ownerName === targetOwnerName && nextOperation.stageName === stageName);
+      continueLoop = !!nextOperation && !(nextOperation.ownerName === targetOwnerName && nextOperation.stageName === stageName);
       if (continueLoop) {
-        await this._clock.tickAsync(1);
+        await this._clock?.tickAsync(1);
       }
     } while (continueLoop);
 
     // Apply any delay
-    if (nextOperation.preActionDelayInMs >= 0) {
-      await this._clock.tickAsync(nextOperation.preActionDelayInMs);
+    if (nextOperation && nextOperation.preActionDelayInMs >= 0) {
+      await this._clock?.tickAsync(nextOperation.preActionDelayInMs);
     }
 
     // Remove the 'nextOperation' from the start of the stage sequence.

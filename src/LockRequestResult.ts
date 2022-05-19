@@ -1,4 +1,4 @@
-import LockResult from './LockResultEnum';
+import LockResultEnum from './LockResultEnum';
 
 /**
  * The result of the lock request. 
@@ -6,16 +6,16 @@ import LockResult from './LockResultEnum';
 export default class LockRequestResult {
   constructor(
     public readonly requestedLockOwner: string,
-    public readonly lockResult: LockResult,
+    public readonly lockResult: LockResultEnum,
     public readonly errorMessage?: string) {
   }
 
-  public get suceeded(): boolean {
-    return this.lockResult === LockResult.Acquired;
+  public get succeeded(): boolean {
+    return this.lockResult === LockResultEnum.Acquired;
   }
 
   public get failed(): boolean {
-    return this.lockResult === LockResult.NotAcquired;
+    return this.lockResult === LockResultEnum.NotAcquired;
   }
 
   public toString(): string {

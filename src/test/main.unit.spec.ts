@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import LockOwner from '../LockOwner';
 import LockRequestResult from '../LockRequestResult';
-import LockResult from '../LockResultEnum';
+import LockResultEnum from '../LockResultEnum';
 import S3Lock from '../S3Lock';
 import IDictionary from './IDIctionary';
 import TestConfig from './TestConfig';
@@ -55,7 +55,7 @@ testCases.forEach((testConfig: TestConfig) => {
             testResults[ownerExpectation.ownerName] = await s3Lock.acquireLock(ownerExpectation.ownerName);
           }
           catch (err) {
-            testResults[ownerExpectation.ownerName] = new LockRequestResult(ownerExpectation.ownerName, LockResult.NotAcquired, err.message);
+            testResults[ownerExpectation.ownerName] = new LockRequestResult(ownerExpectation.ownerName, LockResultEnum.NotAcquired, err.message);
           }
           return testResults[ownerExpectation.ownerName];
         }));
@@ -63,7 +63,7 @@ testCases.forEach((testConfig: TestConfig) => {
       testConfig.testExpectation.ownerExpectations.forEach((ownerExpectation) => {
         if (ownerExpectation.isExpectedToAcquireTheLock) {
           it(`Then the lock for owner ${ownerExpectation.ownerName} should be ${ownerExpectation.expectedLockResult}`, async () => {
-            assert.ok(testResults[ownerExpectation.ownerName].suceeded);
+            assert.ok(testResults[ownerExpectation.ownerName].succeeded);
             const status = await s3Lock.getLockStatus(ownerExpectation.ownerName);
             assert.equal(status.lockOwnerName, ownerExpectation.ownerName);
           });

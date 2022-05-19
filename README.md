@@ -36,31 +36,35 @@ npm install https://github.com/jfstephe/aws-s3-lock
 ## Use
 
 ``` typescript
-import { S3LockCreator, LockRequestResult } from 'aws-s3-lock';
+import { S3Lock, LockRequestResult, LockResultEnum } from 'aws-s3-lock';
 
 // Set the maximum duration the main operation is expected to take.
 // The 'main operation' could be anything and is not governed by this module. FYI AWS operations have have a 2 minute timeout by default.
 const mainOperationDurationInMinutes = 2;
 // NOTE: The S3 bucket and folder needs to exist already.
 // AWS credentials are take from the AWS credentials file or environment variables.
-const s3LockCreator: S3LockCreator = new S3LockCreator('existing-s3-bucket-name', 'existing-s3-bucket-folder', 'some-context', mainOperationDurationInMinutes);
+const s3Lock: S3Lock = new S3Lock('existing-s3-bucket-name', 'existing-s3-bucket-folder', 'lock-name', mainOperationDurationInMinutes);
 
 const ownerName = 'Potential Owner Name';
 let lockRequestResult: LockRequestResult;
 try {
   // This will not throw an exception in general unless an error occurred trying to 'rollback' a lock.
-  lockRequestResult = s3LockCreator.acquireLock(ownerName);
+  await lockRequestResult = s3Lock.acquireLock(ownerName);
 }
 catch (err) {
-  lockRequestResult = new LockRequestResult(ownerName, LockResult.NotAcquired, err.message);
+  lockRequestResult = new LockRequestResult(ownerName, LockResultEnum.NotAcquired, err.message);
 }
 
-if (lockRequestResult.suceeded) {
-  /*
-  DO THE 'MAIN OPERATION' here. This is the thing that you wanted to acquire a lock for. E.g. updating other S3 files without worrying about multiple people changing them (assuming they are using this module too).
-  */
-  // Release the lock if we were successful.
-  s3LockCreator.releaseLock(ownerName);
+if (lockRequestResult.succeeded) {
+  try {
+    /*
+    DO THE 'MAIN OPERATION' here. This is the thing that you wanted to acquire a lock for. E.g. updating other S3 files without worrying about multiple people changing them (assuming they are using this module too).
+    */
+    // Release the lock if we were successful.
+  }
+  finally {
+    s3Lock.releaseLock(ownerName);
+  }
 }
 ```
 

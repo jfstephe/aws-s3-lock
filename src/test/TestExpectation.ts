@@ -1,4 +1,4 @@
-import LockResult from '../LockResultEnum';
+import LockResultEnum from '../LockResultEnum';
 import TestOwnerExpectation from './TestOwnerExpectation'
 
 export default class TestExpectation {
@@ -16,6 +16,6 @@ export default class TestExpectation {
   }
 
   private getNumberOfAcquiredLocksExpected(): number {
-    return this.ownerExpectations.filter((ownerExpectation) => ownerExpectation.expectedLockResult === LockResult.Acquired).length;
+    return this.ownerExpectations.filter((ownerExpectation) => ownerExpectation.expectedLockResult === LockResultEnum.Acquired).length;
   }
 }

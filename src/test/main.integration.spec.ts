@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import LockOwner from '../LockOwner';
 import LockRequestResult from '../LockRequestResult';
-import LockResult from '../LockResultEnum';
+import LockResultEnum from '../LockResultEnum';
 import S3Lock from '../S3Lock';
 import S3LockReadWriter from '../S3LockReadWriter';
 
@@ -29,13 +29,13 @@ describe(`INTEGRATION TEST: Given the locks are configured for AWS S3 bucket "${
         lockRequestResult = await s3Lock.acquireLock(OWNER_NAME);
       }
       catch (err) {
-        lockRequestResult = new LockRequestResult(OWNER_NAME, LockResult.NotAcquired, err.message);
+        lockRequestResult = new LockRequestResult(OWNER_NAME, LockResultEnum.NotAcquired, err.message);
       }
       //  console.log(lockRequestResult.toString())
       return lockRequestResult;
     });
-    it(`Then the lock for owner ${OWNER_NAME} should be ${LockResult.Acquired}`, () => {
-      assert.ok(lockRequestResult.suceeded);
+    it(`Then the lock for owner ${OWNER_NAME} should be ${LockResultEnum.Acquired}`, () => {
+      assert.ok(lockRequestResult.succeeded);
     });
     describe(`When the lock is attempted to be released`, () => {
       beforeEach(async function() {

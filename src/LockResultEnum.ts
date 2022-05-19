@@ -1,6 +1,6 @@
-enum LockResult {
+enum LockResultEnum {
   Acquired = 'Acquired',
   NotAcquired = 'NotAcquired'
 }
 
-export default LockResult;
+export default LockResultEnum;

@@ -4,8 +4,8 @@
   "description": "Creates a lock in S3 without the need for a database",
   "main": "build/index.js",
   "scripts": {
-    "prepare": "rm -rf ./build && tsc && rm -rf ./build/test",
-    "build": "rm -rf ./build && tsc && rm -rf ./build/test",
+    "prepare": "rm -rf ./build && tsc",
+    "build": "rm -rf ./build && tsc",
     "clean": "rm -rf ./node_modules && rm package-lock.json",
     "test": "mocha"
   },

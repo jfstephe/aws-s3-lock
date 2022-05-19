@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import LockOwner from '../LockOwner';
 import LockRequestResult from '../LockRequestResult';
-import LockResult from '../LockResultEnum';
+import LockResultEnum from '../LockResultEnum';
 import S3Lock from '../S3Lock';
 import S3LockReadWriter from '../S3LockReadWriter';
 import IDictionary from './IDIctionary';
@@ -34,7 +34,7 @@ describe(`LOAD TEST: Given the locks are configured for AWS S3 bucket "${S3_BUCK
           testResults[ownerName] = s3Lock.acquireLock(ownerName);
         }
         catch (err) {
-          testResults[ownerName] = Promise.resolve<LockRequestResult>(new LockRequestResult(ownerName, LockResult.NotAcquired, err.message));
+          testResults[ownerName] = Promise.resolve<LockRequestResult>(new LockRequestResult(ownerName, LockResultEnum.NotAcquired, err.message));
         }
       }
       return Promise.all(Object.values(testResults));
@@ -44,16 +44,16 @@ describe(`LOAD TEST: Given the locks are configured for AWS S3 bucket "${S3_BUCK
       results.forEach((lockRequestResult: LockRequestResult) => {
         console.log(lockRequestResult.toString())
       });
-      const suceededRequests = results.filter((lockRequestResult: LockRequestResult) => {
-        return lockRequestResult.suceeded;
+      const succeededRequests = results.filter((lockRequestResult: LockRequestResult) => {
+        return lockRequestResult.succeeded;
       });
       if (this.test) {
         // Adds a dynamic report onto the test step.
-        this.test.title += ` (${suceededRequests.length} succeeded)`;
+        this.test.title += ` (${succeededRequests.length} succeeded)`;
       }
-      assert.ok(suceededRequests.length <= 1, 'At most one request should succeed');
-      if (suceededRequests.length === 1) {
-        assert.ok(suceededRequests[0].suceeded);
+      assert.ok(succeededRequests.length <= 1, 'At most one request should succeed');
+      if (succeededRequests.length === 1) {
+        assert.ok(succeededRequests[0].succeeded);
       }
     });
   });

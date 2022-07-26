@@ -8,14 +8,15 @@ import LockTypeEnum from './LockTypeEnum';
 
 export default class S3LockReadWriter implements ILockReadWriter {
   private _s3: S3;
-  /** Always ends with a '/' */
+  /** Always ends with a '/' if set to a value with a length > 0*/
   private readonly _awslockFolder: string;
 
   constructor(
   private readonly _awsBucketName: string,
   awslockFolder: string,
   private readonly _lockName: string) {
-    this._awslockFolder = awslockFolder.endsWith('/') ? awslockFolder : `${awslockFolder}/`;
+    const isAwslockFolderSet = (awslockFolder ?? '').length > 0;
+    this._awslockFolder = isAwslockFolderSet ? (awslockFolder.endsWith('/') ? awslockFolder : `${awslockFolder}/`) : '';
   }
 
   public init() {

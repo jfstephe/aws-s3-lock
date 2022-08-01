@@ -52,7 +52,7 @@ try {
   await lockRequestResult = s3Lock.acquireLock(ownerName);
 }
 catch (err) {
-  lockRequestResult = new LockRequestResult(ownerName, LockResultEnum.NotAcquired, err.message);
+  lockRequestResult = new LockRequestResult(ownerName, LockResultEnum.NotAcquired, err.message, ErrorCodeEnum.DuringLockRelease);
 }
 
 if (lockRequestResult.succeeded) {

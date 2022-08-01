@@ -1,3 +1,4 @@
+import ErrorCodeEnum from '../ErrorCodeEnum';
 import LockResultEnum from '../LockResultEnum';
 
 export default class TestOwnerExpectation {
@@ -5,6 +6,7 @@ export default class TestOwnerExpectation {
     public readonly ownerName: string, 
     public readonly expectedLockResult: LockResultEnum,
     public readonly errorMessage?: string,
+    public readonly errorCode?: ErrorCodeEnum,
     public readonly exceptionExpected: boolean = false,
     public readonly isExpectedToHaveLockReleased: boolean = false) {
   }

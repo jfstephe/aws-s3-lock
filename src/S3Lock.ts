@@ -1,3 +1,4 @@
+import ErrorCodeEnum from './ErrorCodeEnum';
 import ILockStageContainer from './ILockStageContainer';
 import LockOwner from './LockOwner';
 import LockRequestResult from './LockRequestResult';
@@ -46,6 +47,7 @@ export default class S3Lock {
     let releaseLockOnException: boolean = false;
     let lockCounter: number|undefined;
     let currentLockOwner: LockOwner;
+    let errorCode: ErrorCodeEnum = ErrorCodeEnum.NoLockAcquired;
     try {
       // Initial lock counter get.
       const initialLockCounter: number|undefined = await this._lockStageContainer.getInitialLockCounter(newOwnerName);
@@ -61,6 +63,7 @@ export default class S3Lock {
         await this._lockStageContainer.setLockOwnerForMainAcquire(currentLockOwner);
       }
       else {
+        errorCode = ErrorCodeEnum.OwnedBySomeoneElse;
         throw new Error(`Lock is currently held by owner ${currentLockOwner.lockOwnerName}, wait for ${currentLockOwner.getRemainingTimeInSeconds()} seconds before retrying.`);
       }
 
@@ -73,6 +76,7 @@ export default class S3Lock {
         await this._lockStageContainer.setLockCounter(newOwnerName, lockCounter);
       }
       else {
+        errorCode = ErrorCodeEnum.MultipleSavesInProgress;
         throw new Error(`There is another attempting to acquire the lock at the same time. Please retry.`);
       }
       releaseLockOnException = false;
@@ -80,12 +84,15 @@ export default class S3Lock {
       // Lock Owner - Final check
       currentLockOwner = await this._lockStageContainer.getLockOwnerForFinalCheck(newOwnerName);
       if (LockOwner.isNoLockOwner(currentLockOwner)) {
+        errorCode = ErrorCodeEnum.NoLockAcquired;
         throw new Error(`Lock is not currently held by anyone but should be. Please retry.`);
       }
       else if (newOwnerName !== currentLockOwner.lockOwnerName) {
+        errorCode = ErrorCodeEnum.OwnedBySomeoneElse;
         throw new Error(`Lock is currently held by owner ${currentLockOwner.lockOwnerName}, wait for ${currentLockOwner.getRemainingTimeInSeconds()} seconds before retrying.`);
       }
       else if (currentLockOwner.getRemainingTimeInSeconds() <= (this.maximumAllowedTimeForOperationInMinutes * 60)) {
+        errorCode = ErrorCodeEnum.TooSlowAbandoned;
         throw new Error(`Acquiring the lock took too long, you potentially do not have enough time to perform your opertion (limit set to ${this.maximumAllowedTimeForOperationInMinutes} minutes). Please retry.`);
       }
       lockRequestResult = new LockRequestResult(newOwnerName, LockResultEnum.Acquired)
@@ -99,7 +106,7 @@ export default class S3Lock {
         }
       }
       const errorMessage = `Lock error: ${err.message}`;
-      lockRequestResult = new LockRequestResult(newOwnerName, LockResultEnum.NotAcquired, errorMessage)
+      lockRequestResult = new LockRequestResult(newOwnerName, LockResultEnum.NotAcquired, errorMessage, errorCode)
     }
     return lockRequestResult;
   }

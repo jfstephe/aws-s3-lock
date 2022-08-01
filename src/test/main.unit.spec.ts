@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
+import ErrorCodeEnum from '../ErrorCodeEnum';
 import LockOwner from '../LockOwner';
 import LockRequestResult from '../LockRequestResult';
 import LockResultEnum from '../LockResultEnum';
@@ -55,7 +56,11 @@ testCases.forEach((testConfig: TestConfig) => {
             testResults[ownerExpectation.ownerName] = await s3Lock.acquireLock(ownerExpectation.ownerName);
           }
           catch (err) {
-            testResults[ownerExpectation.ownerName] = new LockRequestResult(ownerExpectation.ownerName, LockResultEnum.NotAcquired, err.message);
+            testResults[ownerExpectation.ownerName] = new LockRequestResult(
+                ownerExpectation.ownerName,
+                LockResultEnum.NotAcquired,
+                err.message,
+                ErrorCodeEnum.DuringLockRelease);
           }
           return testResults[ownerExpectation.ownerName];
         }));
@@ -72,16 +77,20 @@ testCases.forEach((testConfig: TestConfig) => {
           if (ownerExpectation.exceptionExpected) {
             it(`Then call to acquire the lock should thrown an exception with the error message: "${ownerExpectation.errorMessage}"`, () => {
               const errorMessage = testResults[ownerExpectation.ownerName].errorMessage;
+              const errorCode = testResults[ownerExpectation.ownerName].errorCode;
               const hasErrorMessage = !!errorMessage;
               assert.ok(hasErrorMessage && errorMessage.startsWith(ownerExpectation.errorMessage as string), `Error message "${errorMessage}" does not start with "${ownerExpectation.errorMessage}"`);
+              assert.equal(errorCode, ownerExpectation.errorCode);
             });
           }
           else {
             it(`Then the lock for owner ${ownerExpectation.ownerName} should not be acquired and the user should have the error message: "${ownerExpectation.errorMessage}"`, () => {
               assert.ok(testResults[ownerExpectation.ownerName].failed);
               const errorMessage = testResults[ownerExpectation.ownerName].errorMessage;
+              const errorCode = testResults[ownerExpectation.ownerName].errorCode;
               const hasErrorMessage = !!errorMessage;
               assert.ok(hasErrorMessage && errorMessage.startsWith(ownerExpectation.errorMessage as string), `Error message "${errorMessage}" does not start with "${ownerExpectation.errorMessage}"`);
+              assert.equal(errorCode, ownerExpectation.errorCode);
             });
           }
         }

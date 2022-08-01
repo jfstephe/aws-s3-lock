@@ -1,3 +1,4 @@
+import ErrorCodeEnum from '../ErrorCodeEnum';
 import LockOwner from '../LockOwner';
 import LockResultEnum from '../LockResultEnum';
 import InitialState from './InitialState';
@@ -6,6 +7,7 @@ import TestExpectation from './TestExpectation';
 import TestOwnerExpectation from './TestOwnerExpectation';
 import TestStage from './TestStage';
 
+/** For the unit tests */
 export default class TestScenarioLibrary {
   public static readonly testStartTime = new Date('January 1, 2000 13:00:00');
 
@@ -68,7 +70,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.Acquired, undefined, undefined, true)
+        new TestOwnerExpectation('userA', LockResultEnum.Acquired, undefined, undefined, undefined, true)
       ])
   );
 
@@ -109,7 +111,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Acquiring the lock took too long, you potentially do not have enough time to perform your opertion (limit set to 2 minutes). Please retry.')
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Acquiring the lock took too long, you potentially do not have enough time to perform your opertion (limit set to 2 minutes). Please retry.', ErrorCodeEnum.TooSlowAbandoned)
       ])
   );
 
@@ -123,7 +125,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error')
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error', ErrorCodeEnum.NoLockAcquired)
       ])
   )
 
@@ -138,7 +140,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error')
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error', ErrorCodeEnum.NoLockAcquired)
       ])
   );
 
@@ -155,7 +157,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error')
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error', ErrorCodeEnum.NoLockAcquired)
       ])
   );
 
@@ -173,7 +175,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error')
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error', ErrorCodeEnum.NoLockAcquired)
       ])
   );
 
@@ -194,7 +196,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error')
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error', ErrorCodeEnum.NoLockAcquired)
       ])
   );
 
@@ -214,7 +216,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error')
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Some network error', ErrorCodeEnum.NoLockAcquired)
       ])
   );
 
@@ -234,7 +236,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Some network error2', true)
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Some network error2', ErrorCodeEnum.DuringLockRelease, true)
       ])
   );
 
@@ -255,7 +257,7 @@ export default class TestScenarioLibrary {
     ],
     new TestExpectation(
       [
-        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Some network error2', true)
+        new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Some network error2', ErrorCodeEnum.DuringLockRelease, true)
       ])
   );
 
@@ -281,7 +283,7 @@ export default class TestScenarioLibrary {
       ],
       new TestExpectation(
         [
-          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userB, wait for '),
+          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userB, wait for ', ErrorCodeEnum.OwnedBySomeoneElse),
           new TestOwnerExpectation('userB', LockResultEnum.Acquired)
         ])
     );
@@ -304,7 +306,7 @@ export default class TestScenarioLibrary {
       ],
       new TestExpectation(
         [
-          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userB, wait for '),
+          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userB, wait for ', ErrorCodeEnum.OwnedBySomeoneElse),
           new TestOwnerExpectation('userB', LockResultEnum.Acquired)
         ])
     );
@@ -333,7 +335,7 @@ export default class TestScenarioLibrary {
       new TestExpectation(
         [
           new TestOwnerExpectation('userA', LockResultEnum.Acquired),
-          new TestOwnerExpectation('userB', LockResultEnum.NotAcquired, 'Lock error: There is another attempting to acquire the lock at the same time. Please retry.')
+          new TestOwnerExpectation('userB', LockResultEnum.NotAcquired, 'Lock error: There is another attempting to acquire the lock at the same time. Please retry.', ErrorCodeEnum.MultipleSavesInProgress)
         ])
     );
 
@@ -358,8 +360,8 @@ export default class TestScenarioLibrary {
       ],
       new TestExpectation(
         [
-          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is not currently held by anyone but should be. Please retry.'),
-          new TestOwnerExpectation('userB', LockResultEnum.NotAcquired, 'Lock error: There is another attempting to acquire the lock at the same time. Please retry.')
+          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is not currently held by anyone but should be. Please retry.', ErrorCodeEnum.NoLockAcquired),
+          new TestOwnerExpectation('userB', LockResultEnum.NotAcquired, 'Lock error: There is another attempting to acquire the lock at the same time. Please retry.', ErrorCodeEnum.MultipleSavesInProgress)
         ])
     );
 
@@ -384,8 +386,8 @@ export default class TestScenarioLibrary {
       ],
       new TestExpectation(
         [
-          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userB, wait for'),
-          new TestOwnerExpectation('userB', LockResultEnum.NotAcquired, 'Lock error: There is another attempting to acquire the lock at the same time. Please retry.')
+          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userB, wait for', ErrorCodeEnum.OwnedBySomeoneElse),
+          new TestOwnerExpectation('userB', LockResultEnum.NotAcquired, 'Lock error: There is another attempting to acquire the lock at the same time. Please retry.', ErrorCodeEnum.MultipleSavesInProgress)
         ])
     );
 
@@ -417,8 +419,8 @@ export default class TestScenarioLibrary {
       ],
       new TestExpectation(
         [
-          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userC, wait for '),
-          new TestOwnerExpectation('userB', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userC, wait for '),
+          new TestOwnerExpectation('userA', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userC, wait for ', ErrorCodeEnum.OwnedBySomeoneElse),
+          new TestOwnerExpectation('userB', LockResultEnum.NotAcquired, 'Lock error: Lock is currently held by owner userC, wait for ', ErrorCodeEnum.OwnedBySomeoneElse),
           new TestOwnerExpectation('userC', LockResultEnum.Acquired)
         ])
     );

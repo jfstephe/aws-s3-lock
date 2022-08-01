@@ -1,3 +1,4 @@
+import ErrorCodeEnum from './ErrorCodeEnum';
 import LockResultEnum from './LockResultEnum';
 
 /**
@@ -7,7 +8,8 @@ export default class LockRequestResult {
   constructor(
     public readonly requestedLockOwner: string,
     public readonly lockResult: LockResultEnum,
-    public readonly errorMessage?: string) {
+    public readonly errorMessage?: string,
+    public readonly errorCode?: ErrorCodeEnum) {
   }
 
   public get succeeded(): boolean {
